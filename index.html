@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>케이트블랑 드레스룸 - 고객 관리 대시보드</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1>케이트블랑 드레스룸 · 고객 관리 대시보드</h1>
+      <div class="topbar-meta">
+        <div class="global-filter">
+          <span class="filter-label">📅 기간</span>
+          <select id="globalMonthSelect"><option value="">전체 기간</option></select>
+        </div>
+        <span class="topbar-divider"></span>
+        <span id="lastUpdated">로딩 중…</span>
+        <button id="refreshBtn" type="button">새로고침</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Section 1 - KPI 카드 6개 -->
+    <section class="section">
+      <h2 class="section-title">핵심 지표</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">전체 고객</div>
+          <div class="kpi-value" id="kpiTotalCustomers">-</div>
+          <div class="kpi-sub">명</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">진행 중</div>
+          <div class="kpi-value" id="kpiInProgress">-</div>
+          <div class="kpi-sub">건</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">시공 완료</div>
+          <div class="kpi-value" id="kpiCompleted">-</div>
+          <div class="kpi-sub">건</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">총 매출</div>
+          <div class="kpi-value" id="kpiRevenue">-</div>
+          <div class="kpi-sub">원</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">평균 견적</div>
+          <div class="kpi-value" id="kpiAvgQuote">-</div>
+          <div class="kpi-sub">원</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">계약 전환율</div>
+          <div class="kpi-value" id="kpiConversion">-</div>
+          <div class="kpi-sub">%</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2 - 영업 분석 -->
+    <section class="section">
+      <h2 class="section-title">영업 분석</h2>
+      <div class="chart-grid grid-3">
+        <div class="chart-card">
+          <h3>상태별 분포</h3>
+          <div class="chart-wrap"><canvas id="chartStatusDist"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>상태별 월간 현황 (최근 6개월)</h3>
+          <div class="chart-wrap"><canvas id="chartStatusMonthly"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>계약 전환 퍼널</h3>
+          <div class="chart-wrap"><canvas id="chartFunnel"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3 - 매출 분석 -->
+    <section class="section">
+      <h2 class="section-title">매출 분석</h2>
+      <div class="chart-grid grid-3">
+        <div class="chart-card">
+          <h3>월별 매출 (최근 6개월)</h3>
+          <div class="chart-wrap"><canvas id="chartRevenueMonthly"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>일별 매출 (최근 30일)</h3>
+          <div class="chart-wrap"><canvas id="chartRevenueDaily"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>결제방법별 비율</h3>
+          <div class="chart-wrap"><canvas id="chartPayType"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4 - 마케팅 분석 -->
+    <section class="section">
+      <h2 class="section-title">마케팅 분석</h2>
+      <div class="chart-grid grid-2">
+        <div class="chart-card">
+          <h3>상담채널별 유입</h3>
+          <div class="chart-wrap"><canvas id="chartInflowChannel"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>채널별 월간 유입 (최근 6개월)</h3>
+          <div class="chart-wrap"><canvas id="chartInflowMonthly"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5 - 운영 현황 -->
+    <section class="section">
+      <h2 class="section-title">운영 현황</h2>
+      <div class="chart-grid grid-3">
+        <div class="chart-card">
+          <h3>월별 시공 추이 (최근 7개월)</h3>
+          <div class="chart-wrap"><canvas id="chartInstallTrend"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>설치구조별 분포</h3>
+          <div class="chart-wrap"><canvas id="chartInstallType"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>시공기사별 담당</h3>
+          <div class="chart-wrap"><canvas id="chartInstaller"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <small>© 케이트블랑 · 사내 사용 전용 대시보드</small>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
