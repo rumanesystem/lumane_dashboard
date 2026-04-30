@@ -44,8 +44,8 @@ lumane_dashboard/
 Supabase `customer` 스키마 사용
 
 ```
-customer.customer      # 고객 원장 (189명)
-customer.install_view  # 시공 건 View (210건)
+customer.customer      # 고객 원장
+customer.install_view  # 시공 건 View 
 ```
 
 ---
@@ -63,15 +63,7 @@ index.html 우클릭 → Open with Live Server
 
 ---
 
-## Supabase 권한 설정
 
-최초 1회 SQL Editor에서 실행 필요:
-
-```sql
-GRANT USAGE ON SCHEMA customer TO anon;
-GRANT SELECT ON ALL TABLES IN SCHEMA customer TO anon;
-GRANT SELECT ON customer.install_view TO anon;
-```
 
 ---
 
