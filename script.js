@@ -347,10 +347,9 @@ function renderKPIsMonthly(ym) {
   const totalRevenue  = completedRows.reduce((s, i) => s + (Number(i.quote_amount) || 0), 0);
   const avgQuote      = completedRows.length ? totalRevenue / completedRows.length : 0;
 
-  const convertedCount = newCustomers.filter(i =>
-    i.status === '계약완료' || i.status === '시공완료'
-  ).length;
-  const conversion = newCustomers.length ? (convertedCount / newCustomers.length) * 100 : 0;
+  // 계약 전환율은 전체 기간 기준으로 고정
+  const contracted = _kpiInstalls.filter(i => i.status === '계약완료' || i.status === '시공완료').length;
+  const conversion = _kpiInstalls.length ? (contracted / _kpiInstalls.length) * 100 : 0;
 
   document.querySelector('.kpi-card:first-child .kpi-label').textContent = '신규 유입';
   document.getElementById('kpiTotalCustomers').textContent = fmt.num(newCustomers.length);
