@@ -291,13 +291,15 @@ function updateInProgressTooltip(installs) {
   const statusCount = {};
   installs.forEach(i => {
     if (!NON_PROGRESS.has(i.status || '')) {
-      const s = i.status || '미정';
+      const s = i.status || '상태미입력';
       statusCount[s] = (statusCount[s] || 0) + 1;
     }
   });
 
   const total = Object.values(statusCount).reduce((a, b) => a + b, 0);
-  const rows = progressStatuses
+  // STATUS_ORDER 순서대로 + '상태미입력' 마지막에 추가
+  const orderedStatuses = [...progressStatuses, '상태미입력'];
+  const rows = orderedStatuses
     .filter(s => statusCount[s] > 0)
     .map(s => `<div class="kpi-tooltip-row">
       <span class="t-status">${s}</span>
