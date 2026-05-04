@@ -566,9 +566,10 @@ async function loadDashboard() {
     renderMarketingCharts(installs);
     renderOperationCharts(installs);
 
-    const now = new Date();
+    const latestSavedAt = installs.map(i => i.saved_at).filter(Boolean).sort().pop();
+    const d = latestSavedAt ? new Date(latestSavedAt) : new Date();
     document.getElementById('lastUpdated').textContent =
-      `최근 업데이트 ${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      `데이터 기준 ${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   } catch (err) {
     console.error('[Dashboard] 데이터 로드 실패:', err);
     document.getElementById('lastUpdated').textContent = '로드 실패';
