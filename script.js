@@ -318,10 +318,10 @@ function updateInProgressTooltip(installs) {
 function renderKPIsMonthly(ym) {
   // inflow_date 기준 신규 유입 고객
   const newCustomers  = _kpiInstalls.filter(i => ymKey(i.inflow_date) === ym);
-  const monthInstalls = _kpiInstalls.filter(i => ymKey(i.install_date) === ym);
-  const inProgress    = monthInstalls.filter(i => !NON_PROGRESS.has(i.status)).length;
-  const completed     = monthInstalls.filter(i => i.status === '시공완료').length;
-  const completedRows = monthInstalls.filter(i => i.status === '시공완료');
+  // 진행 중 · 완료 · 매출 모두 inflow_date 기준으로 통일
+  const inProgress    = newCustomers.filter(i => !NON_PROGRESS.has(i.status || '')).length;
+  const completedRows = newCustomers.filter(i => i.status === '시공완료');
+  const completed     = completedRows.length;
   const totalRevenue  = completedRows.reduce((s, i) => s + (Number(i.quote_amount) || 0), 0);
   const avgQuote      = completedRows.length ? totalRevenue / completedRows.length : 0;
 
@@ -337,7 +337,7 @@ function renderKPIsMonthly(ym) {
   document.getElementById('kpiRevenue').textContent        = fmt.wonShort(totalRevenue);
   document.getElementById('kpiAvgQuote').textContent       = fmt.wonShort(Math.round(avgQuote));
   document.getElementById('kpiConversion').textContent     = fmt.pct(conversion);
-  updateInProgressTooltip(monthInstalls);
+  updateInProgressTooltip(newCustomers);
 }
 
 // ===== KPI: 전체 누적 =====
