@@ -28,9 +28,8 @@ const NON_PROGRESS = new Set(['시공완료','상담종료','반응무']);
 
 // ===== 전역 상태 =====
 const charts = {};
-let _kpiCustomers = [];
-let _kpiInstalls   = [];
-let globalMonth    = ''; // '' = 전체
+let _kpiInstalls = [];
+let globalMonth  = ''; // '' = 전체
 
 // ===== Chart.js 기본 설정 =====
 Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif";
@@ -86,11 +85,7 @@ function lastNDays(n) {
 }
 
 // ===== 데이터 로드 =====
-async function fetchCustomers() {
-  const { data, error } = await sb.schema('customer').from('customer').select('*').limit(10000);
-  if (error) throw error;
-  return data || [];
-}
+// install_view = install 테이블 기반 뷰 (inflow_type, inflow_date, next_consult_date 포함)
 async function fetchInstalls() {
   const { data, error } = await sb.schema('customer').from('install_view').select('*').limit(10000);
   if (error) throw error;
@@ -126,10 +121,12 @@ function updateFilterBadges(ym) {
 function initGlobalMonthFilter() {
   const sel = document.getElementById('globalMonthSelect');
 
-  // 데이터에서 월 목록 수집
+  // 데이터에서 월 목록 수집 (install_date + inflow_date 둘 다)
   const monthSet = new Set();
-  _kpiInstalls.forEach(i => { const ym = ymKey(i.install_date); if (ym) monthSet.add(ym); });
-  _kpiCustomers.forEach(c => { const ym = ymKey(c.inflow_date);  if (ym) monthSet.add(ym); });
+  _kpiInstalls.forEach(i => {
+    const ym1 = ymKey(i.install_date);  if (ym1) monthSet.add(ym1);
+    const ym2 = ymKey(i.inflow_date);   if (ym2) monthSet.add(ym2);
+  });
   const months = Array.from(monthSet).sort().reverse();
 
   sel.innerHTML = '<option value="">전체 기간</option>' +
@@ -168,10 +165,7 @@ function renderFilteredCharts(ym) {
 function renderFunnelChart(ym) {
   const statusCount = {};
   if (ym) {
-    const custKeys = new Set(
-      _kpiCustomers.filter(c => ymKey(c.inflow_date) === ym).map(c => `${c.name}|${c.phone}`)
-    );
-    _kpiInstalls.filter(i => custKeys.has(`${i.name}|${i.phone}`)).forEach(i => {
+    _kpiInstalls.filter(i => ymKey(i.inflow_date) === ym).forEach(i => {
       const s = i.status || '미정';
       statusCount[s] = (statusCount[s] || 0) + 1;
     });
@@ -221,10 +215,10 @@ function renderPayTypeChart(ym) {
 //   월별: inflow_date 기준
 // ─────────────────────────────────────────────
 function renderInflowChannelChart(ym) {
-  let data = _kpiCustomers;
-  if (ym) data = data.filter(c => ymKey(c.inflow_date) === ym);
+  let data = _kpiInstalls;
+  if (ym) data = data.filter(i => ymKey(i.inflow_date) === ym);
   const channelCount = {};
-  data.forEach(c => { const ch = c.inflow_type || '미정'; channelCount[ch] = (channelCount[ch] || 0) + 1; });
+  data.forEach(i => { const ch = i.inflow_type || '미정'; channelCount[ch] = (channelCount[ch] || 0) + 1; });
   const channelEntries = Object.entries(channelCount).sort((a, b) => b[1] - a[1]);
   renderChart('chartInflowChannel', {
     type: 'bar',
@@ -290,7 +284,8 @@ function renderInstallerChart(ym) {
 
 // ===== KPI: 월별 =====
 function renderKPIsMonthly(ym) {
-  const newCustomers  = _kpiCustomers.filter(c => ymKey(c.inflow_date) === ym);
+  // inflow_date 기준 신규 유입 고객
+  const newCustomers  = _kpiInstalls.filter(i => ymKey(i.inflow_date) === ym);
   const monthInstalls = _kpiInstalls.filter(i => ymKey(i.install_date) === ym);
   const inProgress    = monthInstalls.filter(i => !NON_PROGRESS.has(i.status)).length;
   const completed     = monthInstalls.filter(i => i.status === '시공완료').length;
@@ -298,13 +293,12 @@ function renderKPIsMonthly(ym) {
   const totalRevenue  = completedRows.reduce((s, i) => s + (Number(i.quote_amount) || 0), 0);
   const avgQuote      = completedRows.length ? totalRevenue / completedRows.length : 0;
 
-  const convertedCount = newCustomers.filter(c =>
-    _kpiInstalls.some(i => i.name === c.name && i.phone === c.phone &&
-      (i.status === '계약완료' || i.status === '시공완료'))
+  const convertedCount = newCustomers.filter(i =>
+    i.status === '계약완료' || i.status === '시공완료'
   ).length;
   const conversion = newCustomers.length ? (convertedCount / newCustomers.length) * 100 : 0;
 
-  document.querySelector('.kpi-card:first-child .kpi-label').textContent = '신규 고객';
+  document.querySelector('.kpi-card:first-child .kpi-label').textContent = '신규 유입';
   document.getElementById('kpiTotalCustomers').textContent = fmt.num(newCustomers.length);
   document.getElementById('kpiInProgress').textContent     = fmt.num(inProgress);
   document.getElementById('kpiCompleted').textContent      = fmt.num(completed);
@@ -314,8 +308,9 @@ function renderKPIsMonthly(ym) {
 }
 
 // ===== KPI: 전체 누적 =====
-function renderKPIs(customers, installs) {
-  const totalCustomers = customers.length;
+function renderKPIs(installs) {
+  // inflow_date가 있는 건 = 유입 고객 수
+  const totalCustomers = installs.filter(i => i.inflow_date).length || installs.length;
   const inProgress     = installs.filter(i => !NON_PROGRESS.has(i.status)).length;
   const completed      = installs.filter(i => i.status === '시공완료').length;
   const completedRows  = installs.filter(i => i.status === '시공완료');
@@ -423,21 +418,24 @@ function renderRevenueCharts(installs) {
 }
 
 // ===== Section 4: 마케팅 분석 (채널별 월간 추이 — 필터 미적용) =====
-function renderMarketingCharts(customers) {
+function renderMarketingCharts(installs) {
   // 상담채널별 유입 (전역 필터 함수 호출)
   renderInflowChannelChart(globalMonth);
 
-  // 채널별 월간 유입 (멀티 라인)
+  // 채널별 월간 유입 (멀티 라인, inflow_date 기준 — null inflow_type 제외)
   const channelCount = {};
-  customers.forEach(c => { const ch = c.inflow_type || '미정'; channelCount[ch] = (channelCount[ch] || 0) + 1; });
+  installs.forEach(i => {
+    if (!i.inflow_type || !i.inflow_date) return; // 유입 정보 없는 건 제외
+    channelCount[i.inflow_type] = (channelCount[i.inflow_type] || 0) + 1;
+  });
   const top4 = Object.entries(channelCount).sort((a, b) => b[1] - a[1]).slice(0, 4).map(e => e[0]);
   const months6 = lastNMonths(6);
   const channelMonthMap = {};
   top4.forEach(ch => { channelMonthMap[ch] = Object.fromEntries(months6.map(m => [m, 0])); });
-  customers.forEach(c => {
-    const ym = ymKey(c.inflow_date);
-    const ch = c.inflow_type;
-    if (!ym || !top4.includes(ch) || !(ym in channelMonthMap[ch])) return;
+  installs.forEach(i => {
+    const ym = ymKey(i.inflow_date);
+    const ch = i.inflow_type;
+    if (!ym || !ch || !top4.includes(ch) || !(ym in channelMonthMap[ch])) return;
     channelMonthMap[ch][ym]++;
   });
   renderChart('chartInflowMonthly', {
@@ -501,17 +499,16 @@ async function loadDashboard() {
   document.body.classList.add('is-loading');
   document.getElementById('lastUpdated').textContent = '로딩 중…';
   try {
-    const [customers, installs] = await Promise.all([fetchCustomers(), fetchInstalls()]);
-    console.log(`[Dashboard] 고객 ${customers.length}명, 시공 ${installs.length}건 로드 완료`);
+    const installs = await fetchInstalls();
+    console.log(`[Dashboard] 시공 ${installs.length}건 로드 완료`);
 
-    _kpiCustomers = customers;
-    _kpiInstalls  = installs;
+    _kpiInstalls = installs;
 
-    renderKPIs(customers, installs);
+    renderKPIs(installs);
     initGlobalMonthFilter();
     renderSalesCharts(installs);
     renderRevenueCharts(installs);
-    renderMarketingCharts(customers);
+    renderMarketingCharts(installs);
     renderOperationCharts(installs);
 
     const now = new Date();
