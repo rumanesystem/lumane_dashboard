@@ -142,7 +142,7 @@ function initGlobalMonthFilter() {
     if (globalMonth) {
       renderKPIsMonthly(globalMonth);
     } else {
-      renderKPIs(_kpiCustomers, _kpiInstalls);
+      renderKPIs(_kpiInstalls);
     }
   });
 }
