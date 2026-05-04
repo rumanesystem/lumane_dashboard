@@ -263,3 +263,93 @@ html, body {
   font-size: 13px;
 }
 .is-loading { opacity: 0.6; }
+
+/* ===== 진행 중 카드 상세 툴팁 ===== */
+.kpi-card.has-detail {
+  cursor: default;
+  position: relative;
+}
+.detail-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--text-sub);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 600;
+  margin-left: 4px;
+  vertical-align: middle;
+  cursor: help;
+}
+.kpi-tooltip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  padding: 10px 14px;
+  min-width: 160px;
+  z-index: 100;
+  font-size: 13px;
+  white-space: nowrap;
+}
+/* 위쪽 화살표 */
+.kpi-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  transform: translateX(-50%) rotate(45deg);
+}
+.kpi-card.has-detail:hover .kpi-tooltip,
+.kpi-card.has-detail:focus-within .kpi-tooltip {
+  display: block;
+}
+.kpi-tooltip-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.kpi-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 3px 0;
+  color: var(--text-main);
+}
+.kpi-tooltip-row .t-status { color: var(--text-sub); }
+.kpi-tooltip-row .t-count  { font-weight: 600; color: var(--c-main); }
+.kpi-tooltip-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 6px 0;
+}
+.kpi-tooltip-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+  font-size: 13px;
+}

@@ -282,6 +282,38 @@ function renderInstallerChart(ym) {
 }
 
 
+// ===== 진행 중 툴팁 업데이트 =====
+function updateInProgressTooltip(installs) {
+  const tooltip = document.getElementById('kpiInProgressTooltip');
+  if (!tooltip) return;
+
+  const progressStatuses = STATUS_ORDER.filter(s => !NON_PROGRESS.has(s));
+  const statusCount = {};
+  installs.forEach(i => {
+    if (!NON_PROGRESS.has(i.status || '')) {
+      const s = i.status || '미정';
+      statusCount[s] = (statusCount[s] || 0) + 1;
+    }
+  });
+
+  const total = Object.values(statusCount).reduce((a, b) => a + b, 0);
+  const rows = progressStatuses
+    .filter(s => statusCount[s] > 0)
+    .map(s => `<div class="kpi-tooltip-row">
+      <span class="t-status">${s}</span>
+      <span class="t-count">${statusCount[s]}건</span>
+    </div>`)
+    .join('');
+
+  tooltip.innerHTML = `
+    <div class="kpi-tooltip-title">상태별 진행 현황</div>
+    ${rows}
+    <hr class="kpi-tooltip-divider">
+    <div class="kpi-tooltip-total">
+      <span>합계</span><span>${total}건</span>
+    </div>`;
+}
+
 // ===== KPI: 월별 =====
 function renderKPIsMonthly(ym) {
   // inflow_date 기준 신규 유입 고객
@@ -305,6 +337,7 @@ function renderKPIsMonthly(ym) {
   document.getElementById('kpiRevenue').textContent        = fmt.wonShort(totalRevenue);
   document.getElementById('kpiAvgQuote').textContent       = fmt.wonShort(Math.round(avgQuote));
   document.getElementById('kpiConversion').textContent     = fmt.pct(conversion);
+  updateInProgressTooltip(monthInstalls);
 }
 
 // ===== KPI: 전체 누적 =====
@@ -326,6 +359,7 @@ function renderKPIs(installs) {
   document.getElementById('kpiRevenue').textContent        = fmt.wonShort(totalRevenue);
   document.getElementById('kpiAvgQuote').textContent       = fmt.wonShort(Math.round(avgQuote));
   document.getElementById('kpiConversion').textContent     = fmt.pct(conversion);
+  updateInProgressTooltip(installs);
 }
 
 // ===== Section 2: 영업 분석 (상태별 분포 + 월간 현황 — 필터 미적용) =====
