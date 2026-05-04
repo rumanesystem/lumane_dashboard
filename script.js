@@ -198,15 +198,35 @@ function renderPayTypeChart(ym) {
   let data = _kpiInstalls.filter(i => i.status === '시공완료' && i.quote_amount != null);
   if (ym) data = data.filter(i => ymKey(i.install_date) === ym);
   const payCount = {};
-  data.forEach(i => { const p = i.pay_type || '미정'; payCount[p] = (payCount[p] || 0) + 1; });
+  const payAmount = {};
+  data.forEach(i => {
+    const p = i.pay_type || '미정';
+    payCount[p]  = (payCount[p]  || 0) + 1;
+    payAmount[p] = (payAmount[p] || 0) + (Number(i.quote_amount) || 0);
+  });
   const payEntries = Object.entries(payCount).sort((a, b) => b[1] - a[1]);
+  const amounts = payEntries.map(e => payAmount[e[0]] || 0);
   renderChart('chartPayType', {
     type: 'doughnut',
     data: {
       labels: payEntries.map(e => e[0]),
       datasets: [{ data: payEntries.map(e => e[1]), backgroundColor: payEntries.map((_, i) => COLORS.palette[i % COLORS.palette.length]), borderWidth: 2, borderColor: '#fff' }]
     },
-    options: baseOpts({ cutout: '60%' })
+    options: baseOpts({
+      cutout: '60%',
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 10 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const count  = ctx.parsed;
+              const amount = amounts[ctx.dataIndex];
+              return `  ${ctx.label}: ${count}건 · 합계 ${fmt.wonShort(amount)}원`;
+            }
+          }
+        }
+      }
+    })
   });
 }
 
