@@ -317,15 +317,18 @@ function updateInProgressTooltip(installs) {
   });
 
   const total = Object.values(statusCount).reduce((a, b) => a + b, 0);
-  // STATUS_ORDER 순서대로 + '상태미입력' 마지막에 추가
+  // STATUS_ORDER 순서대로 + 목록 밖 status + '상태미입력' 마지막
   const orderedStatuses = [...progressStatuses, '상태미입력'];
-  const rows = orderedStatuses
+  const extraStatuses = Object.keys(statusCount).filter(s => !orderedStatuses.includes(s));
+  const allStatuses = [...orderedStatuses, ...extraStatuses];
+  const rows = allStatuses
     .filter(s => statusCount[s] > 0)
     .map(s => `<div class="kpi-tooltip-row">
       <span class="t-status">${s}</span>
       <span class="t-count">${statusCount[s]}건</span>
     </div>`)
     .join('');
+
 
   tooltip.innerHTML = `
     <div class="kpi-tooltip-title">상태별 진행 현황</div>
