@@ -93,6 +93,20 @@ window.monaco.editor.getEditors()[0].setValue(`-- SQL 쿼리 전체 --`);
 
 ---
 
+## 6. GitHub Pages 캐시로 인한 변경사항 미반영
+
+**증상**  
+코드 수정 후 push했는데 브라우저에서 변경사항이 반영되지 않음
+
+**원인**  
+브라우저가 이전 버전의 JS/CSS 파일을 캐시에서 불러옴  
+(GitHub Pages 배포는 정상 완료된 상태)
+
+**해결**  
+`Ctrl + Shift + R` (강력 새로고침)으로 캐시 무시하고 재로드
+
+---
+
 ## 7. 월별 필터 시 시공완료 건수·매출 기준 오류 (2026-05-06)
 
 **증상**  
@@ -154,17 +168,3 @@ const extraStatuses   = Object.keys(statusCount).filter(s => !orderedStatuses.in
 const allStatuses     = [...orderedStatuses, ...extraStatuses];
 const rows = allStatuses.filter(s => statusCount[s] > 0).map(...);
 ```
-
----
-
-## 6. GitHub Pages 캐시로 인한 변경사항 미반영
-
-**증상**  
-코드 수정 후 push했는데 브라우저에서 변경사항이 반영되지 않음
-
-**원인**  
-브라우저가 이전 버전의 JS/CSS 파일을 캐시에서 불러옴  
-(GitHub Pages 배포는 정상 완료된 상태)
-
-**해결**  
-`Ctrl + Shift + R` (강력 새로고침)으로 캐시 무시하고 재로드
