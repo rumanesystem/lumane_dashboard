@@ -522,8 +522,8 @@ function renderMarketingCharts(installs) {
 // ===== Section 5: 운영 현황 (월별 시공 추이 — 필터 미적용) =====
 function renderOperationCharts(installs) {
   // 월별 시공 추이
-  const months7 = lastNMonths(7);
-  const monthInstall = Object.fromEntries(months7.map(m => [m, 0]));
+  const months6 = lastNMonths(6);
+  const monthInstall = Object.fromEntries(months6.map(m => [m, 0]));
   installs.forEach(i => {
     if (i.status !== '시공완료') return;
     const ym = ymKey(i.install_date);
@@ -532,8 +532,8 @@ function renderOperationCharts(installs) {
   renderChart('chartInstallTrend', {
     type: 'line',
     data: {
-      labels: months7,
-      datasets: [{ label: '시공 건수', data: months7.map(m => monthInstall[m]), borderColor: COLORS.main, backgroundColor: COLORS.main, tension: 0.3, pointRadius: 4, fill: false }]
+      labels: months6,
+      datasets: [{ label: '시공 건수', data: months6.map(m => monthInstall[m]), borderColor: COLORS.main, backgroundColor: COLORS.main, tension: 0.3, pointRadius: 4, fill: false }]
     },
     options: baseOpts({
       plugins: { legend: { display: false } },
