@@ -362,10 +362,22 @@ function renderKPIsMonthly(ym) {
   document.getElementById('kpiTotalCustomers').textContent = fmt.num(newCustomers.length);
   document.getElementById('kpiInProgress').textContent     = fmt.num(inProgress);
   document.getElementById('kpiCompleted').textContent      = fmt.num(completed);
+  const leadTime = calcAvgLeadTime(installMonth);
   document.getElementById('kpiRevenue').textContent        = fmt.wonShort(totalRevenue);
   document.getElementById('kpiAvgQuote').textContent       = fmt.wonShort(Math.round(avgQuote));
   document.getElementById('kpiConversion').textContent     = fmt.pct(conversion);
+  document.getElementById('kpiLeadTime').textContent       = leadTime != null ? fmt.num(leadTime) : '-';
   updateInProgressTooltip(newCustomers);
+}
+
+function calcAvgLeadTime(rows) {
+  const valid = rows.filter(i => i.status === '시공완료' && i.inflow_date && i.install_date);
+  if (!valid.length) return null;
+  const total = valid.reduce((s, i) => {
+    const days = (new Date(i.install_date) - new Date(i.inflow_date)) / 86400000;
+    return s + (days > 0 ? days : 0);
+  }, 0);
+  return Math.round(total / valid.length);
 }
 
 // ===== KPI: 전체 누적 =====
@@ -384,9 +396,11 @@ function renderKPIs(installs) {
   document.getElementById('kpiTotalCustomers').textContent = fmt.num(totalCustomers);
   document.getElementById('kpiInProgress').textContent     = fmt.num(inProgress);
   document.getElementById('kpiCompleted').textContent      = fmt.num(completed);
+  const leadTime = calcAvgLeadTime(installs);
   document.getElementById('kpiRevenue').textContent        = fmt.wonShort(totalRevenue);
   document.getElementById('kpiAvgQuote').textContent       = fmt.wonShort(Math.round(avgQuote));
   document.getElementById('kpiConversion').textContent     = fmt.pct(conversion);
+  document.getElementById('kpiLeadTime').textContent       = leadTime != null ? fmt.num(leadTime) : '-';
   updateInProgressTooltip(installs);
 }
 
