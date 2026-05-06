@@ -93,6 +93,70 @@ window.monaco.editor.getEditors()[0].setValue(`-- SQL 쿼리 전체 --`);
 
 ---
 
+## 7. 월별 필터 시 시공완료 건수·매출 기준 오류 (2026-05-06)
+
+**증상**  
+4월 필터 선택 시 시공완료 건수와 총 매출이 실제와 다르게 표시됨
+
+**원인**  
+`renderKPIsMonthly`에서 시공완료·매출 모두 `inflow_date` 기준으로 필터링하고 있었음  
+→ "4월에 유입된 고객 중 이미 시공완료된 건"을 집계하므로, 유입 즉시 시공이 일어나지 않는 이상 거의 0에 수렴하거나 의미 없는 수치가 나옴
+
+**해결**  
+시공완료·매출 계산 기준을 `inflow_date` → `install_date`(실제 시공 완료일)로 변경
+
+```javascript
+// 수정 전: inflow_date 기준 (잘못됨)
+const completedRows = newCustomers.filter(i => i.status === '시공완료');
+
+// 수정 후: install_date 기준 (올바름)
+const installMonth  = _kpiInstalls.filter(i => ymKey(i.install_date) === ym);
+const completedRows = installMonth.filter(i => i.status === '시공완료');
+```
+
+---
+
+## 8. 월별 필터 시 "진행 중" KPI와 툴팁 합계 불일치 (2026-05-06)
+
+**증상**  
+신규 유입 7명인데 진행 중 카드에 18건 표시, 툴팁 합계는 7건으로 불일치
+
+**원인**  
+- KPI 카드(진행 중): `install_date` 기준으로 계산 → 18건
+- 툴팁: `inflow_date` 기준(`newCustomers`)으로 계산 → 7건  
+두 값이 서로 다른 기준을 사용해 불일치 발생
+
+**해결**  
+진행 중 KPI를 `inflow_date` 기준(그 달 유입 고객 중 현재 진행 중인 건)으로 통일
+
+```javascript
+// 진행 중: inflow_date 기준
+const inProgress = newCustomers.filter(i => !NON_PROGRESS.has(i.status || '')).length;
+```
+
+---
+
+## 9. 툴팁 STATUS_ORDER 외 status 누락 (2026-05-06)
+
+**증상**  
+5월 필터 시 진행 중 7건인데 툴팁에 가망고객 4건 + 계약완료 2건 = 6건만 표시, 1건 누락
+
+**원인**  
+툴팁 렌더가 `STATUS_ORDER`에 정의된 고정 목록(`orderedStatuses`)만 순회하도록 되어 있어,  
+DB에 목록 밖의 status값이 존재하면 합계에는 더해지지만 행에는 표시되지 않음
+
+**해결**  
+`statusCount`에 있지만 `orderedStatuses`에 없는 항목을 `extraStatuses`로 추출해 함께 표시
+
+```javascript
+const orderedStatuses = [...progressStatuses, '상태미입력'];
+const extraStatuses   = Object.keys(statusCount).filter(s => !orderedStatuses.includes(s));
+const allStatuses     = [...orderedStatuses, ...extraStatuses];
+const rows = allStatuses.filter(s => statusCount[s] > 0).map(...);
+```
+
+---
+
 ## 6. GitHub Pages 캐시로 인한 변경사항 미반영
 
 **증상**  
