@@ -168,3 +168,54 @@ const extraStatuses   = Object.keys(statusCount).filter(s => !orderedStatuses.in
 const allStatuses     = [...orderedStatuses, ...extraStatuses];
 const rows = allStatuses.filter(s => statusCount[s] > 0).map(...);
 ```
+
+---
+
+## 10. 월별 시공 추이 기간 변경 (2026-05-06)
+
+**변경 요청**  
+운영 현황의 월별 시공 추이 차트를 최근 7개월 → 최근 6개월로 변경
+
+**변경 내용**  
+`script.js`의 `renderOperationCharts`에서 `lastNMonths(7)` → `lastNMonths(6)` 수정  
+`index.html` 차트 제목 "최근 7개월" → "최근 6개월" 수정
+
+---
+
+## 11. 계약 전환율 위치 변경 (2026-05-06)
+
+**변경 요청**  
+계약 전환율을 KPI 카드 영역에서 제거하고, 헤더 기간 선택 옆에 텍스트로 표시
+
+**변경 내용**  
+- `index.html`: 계약 전환율 KPI 카드 제거, 헤더 `.global-filter` 옆에 `.header-conversion` 요소 추가
+- `style.css`: `.header-conversion` 스타일 추가 (폰트 크기 13px, 값은 네이비 bold)
+
+```html
+<span class="header-conversion">계약 전환율 <strong id="kpiConversion">-</strong></span>
+```
+
+---
+
+## 12. 평균 리드타임 KPI 카드 추가 (2026-05-06)
+
+**변경 요청**  
+계약 전환율 카드 제거로 생긴 빈 자리에 평균 리드타임(유입 → 시공완료 평균 일수) 추가
+
+**변경 내용**  
+- `index.html`: KPI 카드 `kpiLeadTime` 추가
+- `script.js`: `calcAvgLeadTime` 헬퍼 함수 추가, `renderKPIs` · `renderKPIsMonthly` 양쪽에 반영
+
+```javascript
+function calcAvgLeadTime(rows) {
+  const valid = rows.filter(i => i.status === '시공완료' && i.inflow_date && i.install_date);
+  if (!valid.length) return null;
+  const total = valid.reduce((s, i) => {
+    const days = (new Date(i.install_date) - new Date(i.inflow_date)) / 86400000;
+    return s + (days > 0 ? days : 0);
+  }, 0);
+  return Math.round(total / valid.length);
+}
+```
+
+월별 필터 시 해당 월 `install_date` 기준 완료 건, 전체 기간은 전체 누적 기준으로 계산
