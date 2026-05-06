@@ -338,11 +338,13 @@ function updateInProgressTooltip(installs) {
 
 // ===== KPI: 월별 =====
 function renderKPIsMonthly(ym) {
-  // inflow_date 기준 신규 유입 고객
+  // 신규 유입: inflow_date 기준
   const newCustomers  = _kpiInstalls.filter(i => ymKey(i.inflow_date) === ym);
-  // 진행 중 · 완료 · 매출 모두 inflow_date 기준으로 통일
-  const inProgress    = newCustomers.filter(i => !NON_PROGRESS.has(i.status || '')).length;
-  const completedRows = newCustomers.filter(i => i.status === '시공완료');
+
+  // 진행 중 · 완료 · 매출: install_date 기준으로 통일 (실제 시공 월 기준)
+  const installMonth   = _kpiInstalls.filter(i => ymKey(i.install_date) === ym);
+  const inProgress    = installMonth.filter(i => !NON_PROGRESS.has(i.status || '')).length;
+  const completedRows = installMonth.filter(i => i.status === '시공완료');
   const completed     = completedRows.length;
   const totalRevenue  = completedRows.reduce((s, i) => s + (Number(i.quote_amount) || 0), 0);
   const avgQuote      = completedRows.length ? totalRevenue / completedRows.length : 0;
