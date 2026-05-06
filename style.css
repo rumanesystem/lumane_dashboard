@@ -92,6 +92,15 @@ html, body {
   background: var(--border);
   margin: 0 4px;
 }
+.header-conversion {
+  font-size: 13px;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+.header-conversion strong {
+  color: var(--c-main);
+  font-weight: 700;
+}
 #refreshBtn {
   border: 1px solid var(--border);
   background: #fff;
