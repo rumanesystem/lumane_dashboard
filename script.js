@@ -102,7 +102,7 @@ function renderChart(id, config) {
 
 // ===== 차트 제목에 필터 배지 표시 =====
 const FILTERED_CHART_LABELS = {
-  chartFunnel:        '계약 전환 퍼널',
+  chartFunnel:        '영업 단계별 현황',
   chartPayType:       '결제방법별 비율',
   chartInflowChannel: '상담채널별 유입',
   chartInstallType:   '설치구조별 분포',
