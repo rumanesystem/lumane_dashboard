@@ -317,18 +317,16 @@ function updateInProgressTooltip(installs) {
   });
 
   const total = Object.values(statusCount).reduce((a, b) => a + b, 0);
-  // STATUS_ORDER 순서대로 + 목록 밖 status + '상태미입력' 마지막
   const orderedStatuses = [...progressStatuses, '상태미입력'];
   const extraStatuses = Object.keys(statusCount).filter(s => !orderedStatuses.includes(s));
   const allStatuses = [...orderedStatuses, ...extraStatuses];
   const rows = allStatuses
     .filter(s => statusCount[s] > 0)
-    .map(s => `<div class="kpi-tooltip-row">
+    .map(s => `<div class="kpi-tooltip-row kpi-tooltip-clickable" data-status="${s}">
       <span class="t-status">${s}</span>
       <span class="t-count">${statusCount[s]}건</span>
     </div>`)
     .join('');
-
 
   tooltip.innerHTML = `
     <div class="kpi-tooltip-title">상태별 진행 현황</div>
@@ -337,6 +335,54 @@ function updateInProgressTooltip(installs) {
     <div class="kpi-tooltip-total">
       <span>합계</span><span>${total}건</span>
     </div>`;
+
+  // 각 행 클릭 → 모달 열기
+  tooltip.querySelectorAll('.kpi-tooltip-clickable').forEach(row => {
+    row.addEventListener('click', () => {
+      const status = row.dataset.status;
+      openCustomerModal(status, installs);
+    });
+  });
+}
+
+// ===== 고객 목록 모달 =====
+function renderContactCell(phone) {
+  if (!phone) return '<span class="contact-none">연락처 없음</span>';
+  if (phone.startsWith('@no_contact_')) return '<span class="contact-none">연락처 없음</span>';
+  if (phone.startsWith('@')) return `<span class="contact-insta">${phone}</span>`;
+  return `<span class="contact-phone">${phone}</span>`;
+}
+
+function renderDateCell(dateStr) {
+  if (!dateStr) return '<span class="date-normal">—</span>';
+  const diff = (new Date(dateStr) - new Date()) / 86400000;
+  if (diff >= 0 && diff <= 7) return `<span class="date-soon">${dateStr}</span>`;
+  return `<span class="date-normal">${dateStr}</span>`;
+}
+
+function openCustomerModal(status, installs) {
+  const rows = installs.filter(i => (i.status || '상태미입력') === status);
+  document.getElementById('modalTitle').textContent = status;
+  document.getElementById('modalBadge').textContent = `${rows.length}건`;
+
+  const tbody = document.getElementById('modalTableBody');
+  tbody.innerHTML = rows.length === 0
+    ? '<tr><td colspan="6" style="text-align:center;color:#adb5bd;padding:24px;">고객이 없습니다</td></tr>'
+    : rows.map((i, idx) => `
+        <tr>
+          <td class="row-num">${idx + 1}</td>
+          <td>${i.name || '—'}</td>
+          <td>${renderContactCell(i.phone)}</td>
+          <td>${i.inflow_type || '—'}</td>
+          <td>${renderDateCell(i.inflow_date)}</td>
+          <td>${renderDateCell(i.next_consult_date)}</td>
+        </tr>`).join('');
+
+  document.getElementById('customerModal').style.display = 'flex';
+}
+
+function closeCustomerModal() {
+  document.getElementById('customerModal').style.display = 'none';
 }
 
 // ===== KPI: 월별 =====
@@ -601,4 +647,10 @@ async function loadDashboard() {
 }
 
 document.getElementById('refreshBtn').addEventListener('click', loadDashboard);
+
+// ===== 모달 닫기 이벤트 =====
+document.getElementById('modalClose').addEventListener('click', closeCustomerModal);
+document.getElementById('customerModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('customerModal')) closeCustomerModal();
+});
 loadDashboard();

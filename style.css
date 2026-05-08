@@ -239,6 +239,95 @@ html, body {
 }
 .chart-wrap canvas { max-height: 100%; }
 
+/* ===== 고객 목록 모달 ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  width: 700px;
+  max-width: 95vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.modal-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.modal-badge {
+  font-size: 13px;
+  color: var(--c-main);
+  font-weight: 600;
+  background: #EBF2FB;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.modal-close {
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: var(--text-sub);
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.modal-close:hover { background: #F1F3F5; color: var(--text-main); }
+.modal-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 16px 24px 20px;
+}
+.modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.modal-table thead th {
+  text-align: left;
+  padding: 8px 10px;
+  color: var(--text-sub);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.modal-table tbody tr {
+  border-bottom: 1px solid #F1F3F5;
+  transition: background 0.15s;
+}
+.modal-table tbody tr:hover { background: #F8F9FA; }
+.modal-table tbody tr:last-child { border-bottom: none; }
+.modal-table tbody td {
+  padding: 10px;
+  color: var(--text-main);
+  vertical-align: middle;
+}
+.contact-phone  { color: #1D9E75; font-size: 12px; }
+.contact-insta  { color: #BA7517; font-size: 12px; }
+.contact-none   { color: #adb5bd; font-size: 12px; }
+.date-normal    { color: var(--text-sub); font-size: 12px; }
+.date-soon      { color: var(--c-main); font-size: 12px; font-weight: 600; }
+.row-num        { color: var(--text-sub); }
+
 /* ===== Footer ===== */
 .footer {
   text-align: center;
@@ -348,6 +437,8 @@ html, body {
 }
 .kpi-tooltip-row .t-status { color: var(--text-sub); }
 .kpi-tooltip-row .t-count  { font-weight: 600; color: var(--c-main); }
+.kpi-tooltip-clickable { cursor: pointer; border-radius: 6px; padding: 3px 4px; margin: 0 -4px; }
+.kpi-tooltip-clickable:hover { background: #F1F3F5; }
 .kpi-tooltip-divider {
   border: none;
   border-top: 1px solid var(--border);
