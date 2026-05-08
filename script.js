@@ -67,6 +67,13 @@ function ymdKey(dateStr) {
   if (!dateStr) return null;
   return String(dateStr).slice(0, 10);
 }
+// 월(YYYY-MM) 또는 일(YYYY-MM-DD) 필터 공용 비교
+function matchDateFilter(dateStr, filter) {
+  if (!dateStr || !filter) return false;
+  return filter.length === 10
+    ? ymdKey(dateStr) === filter
+    : ymKey(dateStr) === filter;
+}
 function lastNMonths(n) {
   const arr = [], now = new Date();
   for (let i = n - 1; i >= 0; i--) {
@@ -134,17 +141,36 @@ function initGlobalMonthFilter() {
 
   sel.addEventListener('change', () => {
     globalMonth = sel.value;
+    // 날짜 input 초기화
+    const dateInput = document.getElementById('globalDateInput');
+    if (dateInput) dateInput.value = '';
 
-    // 5개 차트 갱신
     renderFilteredCharts(globalMonth);
-
-    // KPI 갱신
     if (globalMonth) {
       renderKPIsMonthly(globalMonth);
     } else {
       renderKPIs(_kpiInstalls);
     }
   });
+
+  // 날짜 input 이벤트
+  const dateInput = document.getElementById('globalDateInput');
+  if (dateInput) {
+    // 오늘 날짜를 max로 설정
+    dateInput.max = new Date().toISOString().slice(0, 10);
+
+    dateInput.addEventListener('change', () => {
+      globalMonth = dateInput.value; // YYYY-MM-DD 저장
+      sel.value = '';                // 월 드롭다운 초기화
+
+      renderFilteredCharts(globalMonth);
+      if (globalMonth) {
+        renderKPIsMonthly(globalMonth);
+      } else {
+        renderKPIs(_kpiInstalls);
+      }
+    });
+  }
 }
 
 // ===== 전역 필터 적용 5개 차트 일괄 렌더 =====
@@ -165,7 +191,7 @@ function renderFilteredCharts(ym) {
 function renderFunnelChart(ym) {
   const statusCount = {};
   if (ym) {
-    _kpiInstalls.filter(i => ymKey(i.inflow_date) === ym).forEach(i => {
+    _kpiInstalls.filter(i => matchDateFilter(i.inflow_date, ym)).forEach(i => {
       const s = i.status || '미정';
       statusCount[s] = (statusCount[s] || 0) + 1;
     });
@@ -196,7 +222,7 @@ function renderFunnelChart(ym) {
 // ─────────────────────────────────────────────
 function renderPayTypeChart(ym) {
   let data = _kpiInstalls.filter(i => i.status === '시공완료' && i.quote_amount != null);
-  if (ym) data = data.filter(i => ymKey(i.install_date) === ym);
+  if (ym) data = data.filter(i => matchDateFilter(i.install_date, ym));
   const payCount = {};
   const payAmount = {};
   data.forEach(i => {
@@ -236,7 +262,7 @@ function renderPayTypeChart(ym) {
 // ─────────────────────────────────────────────
 function renderInflowChannelChart(ym) {
   let data = _kpiInstalls;
-  if (ym) data = data.filter(i => ymKey(i.inflow_date) === ym);
+  if (ym) data = data.filter(i => matchDateFilter(i.inflow_date, ym));
   const channelCount = {};
   data.forEach(i => { const ch = i.inflow_type || '미정'; channelCount[ch] = (channelCount[ch] || 0) + 1; });
   const channelEntries = Object.entries(channelCount).sort((a, b) => b[1] - a[1]);
@@ -260,7 +286,7 @@ function renderInflowChannelChart(ym) {
 // ─────────────────────────────────────────────
 function renderInstallTypeChart(ym) {
   let data = _kpiInstalls;
-  if (ym) data = data.filter(i => ymKey(i.install_date) === ym);
+  if (ym) data = data.filter(i => matchDateFilter(i.install_date, ym));
   const typeCount = {};
   data.forEach(i => { const t = (i.install_type && i.install_type.trim()) || '미정'; typeCount[t] = (typeCount[t] || 0) + 1; });
   const typeEntries = Object.entries(typeCount).sort((a, b) => b[1] - a[1]);
@@ -283,7 +309,7 @@ function renderInstallTypeChart(ym) {
 // ─────────────────────────────────────────────
 function renderInstallerChart(ym) {
   let data = _kpiInstalls;
-  if (ym) data = data.filter(i => ymKey(i.install_date) === ym);
+  if (ym) data = data.filter(i => matchDateFilter(i.install_date, ym));
   const installerCount = {};
   data.forEach(i => { if (!i.installer) return; installerCount[i.installer] = (installerCount[i.installer] || 0) + 1; });
   const installerEntries = Object.entries(installerCount).sort((a, b) => b[1] - a[1]);
@@ -388,13 +414,13 @@ function closeCustomerModal() {
 // ===== KPI: 월별 =====
 function renderKPIsMonthly(ym) {
   // 신규 유입: inflow_date 기준
-  const newCustomers  = _kpiInstalls.filter(i => ymKey(i.inflow_date) === ym);
+  const newCustomers  = _kpiInstalls.filter(i => matchDateFilter(i.inflow_date, ym));
 
   // 진행 중: inflow_date 기준 (그 달 유입 고객 중 현재 진행 중)
   const inProgress    = newCustomers.filter(i => !NON_PROGRESS.has(i.status || '')).length;
 
   // 시공 완료 · 매출: install_date 기준 (실제 그 달에 완료된 건)
-  const installMonth   = _kpiInstalls.filter(i => ymKey(i.install_date) === ym);
+  const installMonth   = _kpiInstalls.filter(i => matchDateFilter(i.install_date, ym));
   const completedRows = installMonth.filter(i => i.status === '시공완료');
   const completed     = completedRows.length;
   const totalRevenue  = completedRows.reduce((s, i) => s + (Number(i.quote_amount) || 0), 0);

@@ -86,6 +86,17 @@ html, body {
   min-width: 110px;
 }
 .global-filter select:focus { border-color: var(--c-main); }
+#globalDateInput {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 13px;
+  color: var(--text-main);
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+#globalDateInput:focus { border-color: var(--c-main); }
 .topbar-divider {
   width: 1px;
   height: 20px;
