@@ -514,7 +514,7 @@ html, body {
 .detail-panel {
   width: 0;
   min-width: 0;
-  overflow: hidden;
+  overflow-x: hidden;
   opacity: 0;
   transition: width 0.3s ease, opacity 0.25s ease, margin 0.3s ease;
   background: #fff;
@@ -523,6 +523,9 @@ html, body {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  position: sticky;
+  top: 68px;
+  max-height: calc(100vh - 84px);
 }
 .detail-panel.open {
   width: 320px;
