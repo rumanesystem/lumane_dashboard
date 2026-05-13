@@ -5,11 +5,7 @@
    - 전역 월 필터: 5개 차트 연동
    =========================================================== */
 
-// ===== Supabase 연결 정보 =====
-const SUPABASE_URL = 'https://rvhjztpddkfnfytkbuca.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2aGp6dHBkZGtmbmZ5dGtidWNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MTE0OTcsImV4cCI6MjA5MTA4NzQ5N30._boEK0iqvN9d8yjdgv7WpcTF0jIUC-hhXSOYrwFu9fA';
-
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Supabase 연결: supabase-client.js 에서 sb 전역 변수 주입
 
 // ===== 색상 팔레트 =====
 const COLORS = {
@@ -47,6 +43,8 @@ function baseOpts(extra = {}) {
 }
 
 // ===== 유틸 =====
+// esc() 는 utils.js 에서 전역 주입
+
 const fmt = {
   num: n => (n ?? 0).toLocaleString('ko-KR'),
   won: n => (n ?? 0).toLocaleString('ko-KR'),
@@ -375,15 +373,16 @@ function updateInProgressTooltip(installs) {
 function renderContactCell(phone) {
   if (!phone) return '<span class="contact-none">연락처 없음</span>';
   if (phone.startsWith('@no_contact_')) return '<span class="contact-none">연락처 없음</span>';
-  if (phone.startsWith('@')) return `<span class="contact-insta">${phone}</span>`;
-  return `<span class="contact-phone">${phone}</span>`;
+  if (phone.startsWith('@')) return `<span class="contact-insta">${esc(phone)}</span>`;
+  return `<span class="contact-phone">${esc(phone)}</span>`;
 }
 
 function renderDateCell(dateStr) {
   if (!dateStr) return '<span class="date-normal">—</span>';
   const diff = (new Date(dateStr) - new Date()) / 86400000;
-  if (diff >= 0 && diff <= 7) return `<span class="date-soon">${dateStr}</span>`;
-  return `<span class="date-normal">${dateStr}</span>`;
+  const escaped = esc(String(dateStr).slice(0, 10));
+  if (diff >= 0 && diff <= 7) return `<span class="date-soon">${escaped}</span>`;
+  return `<span class="date-normal">${escaped}</span>`;
 }
 
 function openCustomerModal(status, installs) {
@@ -397,9 +396,9 @@ function openCustomerModal(status, installs) {
     : rows.map((i, idx) => `
         <tr>
           <td class="row-num">${idx + 1}</td>
-          <td>${i.name || '—'}</td>
+          <td>${esc(i.name) || '—'}</td>
           <td>${renderContactCell(i.phone)}</td>
-          <td>${i.inflow_type || '—'}</td>
+          <td>${esc(i.inflow_type) || '—'}</td>
           <td>${renderDateCell(i.inflow_date)}</td>
           <td>${renderDateCell(i.next_consult_date)}</td>
         </tr>`).join('');
