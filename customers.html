@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>고객 목록 - 케이트블랑 드레스룸</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1>케이트블랑 드레스룸 · 고객 관리 대시보드</h1>
+      <nav class="topbar-nav">
+        <a href="index.html" class="nav-tab">통계</a>
+        <a href="customers.html" class="nav-tab active">고객 목록</a>
+      </nav>
+      <div class="topbar-meta">
+        <span id="lastUpdated">로딩 중…</span>
+        <button id="refreshBtn" type="button">새로고침</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section">
+      <h2 class="section-title">고객 목록</h2>
+
+      <div class="table-toolbar">
+        <div class="table-toolbar-left">
+          <input type="text" id="searchInput" placeholder="고객명 또는 연락처 검색…" class="search-input" />
+          <select id="statusFilter" class="status-filter">
+            <option value="">전체 상태</option>
+            <option>상담전</option>
+            <option>가능고객</option>
+            <option>가망고객</option>
+            <option>견적발송</option>
+            <option>시공일미정</option>
+            <option>계약완료</option>
+            <option>시공완료</option>
+            <option>상담종료</option>
+            <option>반응무</option>
+          </select>
+
+        </div>
+        <span id="rowCount" class="row-count">- 건</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="customer-table">
+          <thead>
+            <tr>
+              <th class="col-idx">#</th>
+              <th class="col-name sortable" data-col="name">고객명 <span class="sort-icon">↕</span></th>
+              <th class="col-phone">연락처</th>
+              <th class="col-status sortable" data-col="status">상태 <span class="sort-icon">↕</span></th>
+              <th class="col-date sortable" data-col="inflow_date">유입일 <span class="sort-icon">↕</span></th>
+              <th class="col-date sortable" data-col="install_date">시공일 <span class="sort-icon">↕</span></th>
+              <th class="col-amount sortable" data-col="quote_amount">견적금액 <span class="sort-icon">↕</span></th>
+              <th class="col-addr">주소</th>
+              <th class="col-loc">위치</th>
+              <th class="col-pay">결제방법</th>
+              <th class="col-installer">시공기사</th>
+              <th class="col-notes">메모</th>
+            </tr>
+          </thead>
+          <tbody id="customerTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <small>© 케이트블랑 · 사내 사용 전용 대시보드</small>
+    </footer>
+  </main>
+
+  <script src="utils.js"></script>
+  <script src="supabase-client.js"></script>
+  <script src="customers.js"></script>
+</body>
+</html>

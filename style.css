@@ -359,6 +359,13 @@ html, body {
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .kpi-value { font-size: 22px; }
   .chart-wrap { height: 240px; }
+
+  /* 고객 목록: 모바일에서 비핵심 컬럼 숨김 */
+  .customer-table .col-addr,
+  .customer-table .col-loc,
+  .customer-table .col-pay,
+  .customer-table .col-installer,
+  .customer-table .col-notes { display: none; }
 }
 
 /* ===== 로딩/에러 표시 ===== */
@@ -372,6 +379,118 @@ html, body {
   font-size: 13px;
 }
 .is-loading { opacity: 0.6; }
+
+/* ===== 페이지 내비게이션 탭 ===== */
+.topbar-nav {
+  display: flex;
+  gap: 4px;
+}
+.nav-tab {
+  text-decoration: none;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-sub);
+  transition: all .15s;
+}
+.nav-tab:hover { background: var(--card-bg); color: var(--text-main); }
+.nav-tab.active { background: var(--c-main); color: #fff; }
+
+/* ===== 고객 목록 테이블 페이지 ===== */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.table-toolbar-left { display: flex; gap: 8px; flex-wrap: wrap; }
+.search-input {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--text-main);
+  background: #fff;
+  outline: none;
+  width: 220px;
+}
+.search-input:focus { border-color: var(--c-main); }
+.status-filter {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  color: var(--text-main);
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+.status-filter:focus { border-color: var(--c-main); }
+.row-count { font-size: 13px; color: var(--text-sub); white-space: nowrap; }
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+.customer-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.customer-table thead th {
+  background: #F8F9FA;
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--text-sub);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.customer-table thead th.sortable { cursor: pointer; user-select: none; }
+.customer-table thead th.sortable:hover { background: #F1F3F5; color: var(--text-main); }
+.customer-table thead th.sort-active { color: var(--c-main); }
+.customer-table thead th .sort-icon { font-size: 11px; margin-left: 3px; opacity: 0.6; }
+.customer-table thead th.sort-active .sort-icon { opacity: 1; }
+.customer-table tbody tr { border-bottom: 1px solid #F1F3F5; transition: background .12s; }
+.customer-table tbody tr:hover { background: #F8F9FA; }
+.customer-table tbody tr:last-child { border-bottom: none; }
+.customer-table tbody td {
+  padding: 9px 12px;
+  vertical-align: middle;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+.col-idx    { width: 44px; color: var(--text-sub); text-align: right; }
+.col-name   { min-width: 80px; font-weight: 500; }
+.col-phone  { min-width: 130px; color: var(--text-sub); }
+.col-status { min-width: 90px; }
+.col-date   { min-width: 90px; color: var(--text-sub); }
+.col-amount { min-width: 100px; text-align: right; }
+.col-addr   { min-width: 180px; }
+.col-loc    { min-width: 80px; }
+.col-pay    { min-width: 100px; }
+.col-installer { min-width: 80px; }
+.col-notes  {
+  min-width: 160px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-sub);
+}
+.status-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
 
 /* ===== 진행 중 카드 상세 툴팁 ===== */
 .kpi-card.has-detail {
