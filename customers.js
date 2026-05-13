@@ -166,10 +166,11 @@ function detailRow(label, value) {
   </div>`;
 }
 
-function fileBadge(label, has) {
-  const cls = has ? 'has' : 'none';
-  const icon = has ? '✓' : '✗';
-  return `<span class="file-badge ${cls}">${icon} ${label}</span>`;
+function fileLinkBadge(label, url) {
+  if (url) {
+    return `<a class="file-badge has" href="${esc(url)}" target="_blank" rel="noopener">✓ ${label}</a>`;
+  }
+  return `<span class="file-badge none">✗ ${label}</span>`;
 }
 
 function openDetailPanel(r, tr) {
@@ -201,19 +202,37 @@ function openDetailPanel(r, tr) {
       ${detailRow('시공일', fmtDate(r.install_date))}
       ${detailRow('설치구조', esc(r.install_type))}
       ${detailRow('시공기사', esc(r.installer))}
-      ${detailRow('지역', esc(r.region))}
     </div>
+    ${(r.height_ceiling || r.height_curtain_box || r.side_a || r.side_b || r.side_c || r.side_d || r.side_e) ? `
+    <div class="detail-section">
+      <div class="detail-section-title">치수</div>
+      ${r.height_ceiling   ? detailRow('천장 높이', esc(r.height_ceiling))   : ''}
+      ${r.height_curtain_box ? detailRow('커튼박스', esc(r.height_curtain_box)) : ''}
+      ${r.side_a ? detailRow('A면', esc(r.side_a)) : ''}
+      ${r.side_b ? detailRow('B면', esc(r.side_b)) : ''}
+      ${r.side_c ? detailRow('C면', esc(r.side_c)) : ''}
+      ${r.side_d ? detailRow('D면', esc(r.side_d)) : ''}
+      ${r.side_e ? detailRow('E면', esc(r.side_e)) : ''}
+    </div>` : ''}
+    ${(r.options || r.ceiling_structure || r.color_frame || r.color_shelf) ? `
+    <div class="detail-section">
+      <div class="detail-section-title">시공 옵션</div>
+      ${r.options           ? detailRow('옵션',       esc(r.options))           : ''}
+      ${r.ceiling_structure ? detailRow('천장 구조',  esc(r.ceiling_structure)) : ''}
+      ${r.color_frame       ? detailRow('프레임 색상', esc(r.color_frame))       : ''}
+      ${r.color_shelf       ? detailRow('선반 색상',  esc(r.color_shelf))       : ''}
+    </div>` : ''}
     <div class="detail-section">
       <div class="detail-section-title">견적 · 결제</div>
       ${detailRow('견적금액', fmtWon(r.quote_amount))}
       ${detailRow('결제방법', esc(r.pay_type))}
     </div>
     <div class="detail-section">
-      <div class="detail-section-title">파일 보유</div>
+      <div class="detail-section-title">파일</div>
       <div style="padding:4px 0;">
-        ${fileBadge('견적서', r.has_quote)}
-        ${fileBadge('방사진', r.has_room_photo)}
-        ${fileBadge('시공사진', r.has_install_photo)}
+        ${fileLinkBadge('견적서', r.file_quote)}
+        ${fileLinkBadge('방사진', r.file_room_photo)}
+        ${fileLinkBadge('시공사진', r.file_install_photo)}
       </div>
     </div>
     ${r.address || r.location ? `
