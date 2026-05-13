@@ -49,7 +49,7 @@ function renderTable(rows) {
   }
 
   tbody.innerHTML = rows.map((r, i) => `
-    <tr>
+    <tr data-id="${r.install_id}">
       <td class="col-idx">${i + 1}</td>
       <td class="col-name">${esc(r.name) || '-'}</td>
       <td class="col-phone">${esc(r.phone) || '-'}</td>
@@ -64,6 +64,15 @@ function renderTable(rows) {
       <td class="col-notes" title="${esc(r.notes)}">${esc(r.notes) || '-'}</td>
     </tr>
   `).join('');
+
+  // 행 클릭 → 사이드 패널
+  tbody.querySelectorAll('tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      const id = Number(tr.dataset.id);
+      const row = _allRows.find(r => r.install_id === id);
+      if (row) openDetailPanel(row, tr);
+    });
+  });
 }
 
 const STATUS_ORDER_LIST = ['상담전','가능고객','가망고객','견적발송','시공일미정','계약완료','시공완료','상담종료','반응무'];
@@ -146,6 +155,89 @@ async function load() {
     wrap.classList.remove('is-loading');
   }
 }
+
+// ===== 사이드 패널 =====
+let _selectedTr = null;
+
+function detailRow(label, value) {
+  return `<div class="detail-row">
+    <span class="detail-label">${label}</span>
+    <span class="detail-value">${value || '-'}</span>
+  </div>`;
+}
+
+function fileBadge(label, has) {
+  const cls = has ? 'has' : 'none';
+  const icon = has ? '✓' : '✗';
+  return `<span class="file-badge ${cls}">${icon} ${label}</span>`;
+}
+
+function openDetailPanel(r, tr) {
+  // 선택 행 하이라이트
+  if (_selectedTr) _selectedTr.classList.remove('row-selected');
+  _selectedTr = tr;
+  tr.classList.add('row-selected');
+
+  // 헤더
+  document.getElementById('detailName').textContent = r.name || '-';
+  document.getElementById('detailStatus').innerHTML = fmtStatus(r.status);
+
+  // 본문 구성
+  const phone = r.phone || '';
+  const isInsta = phone.startsWith('@') && !phone.startsWith('@no_contact_');
+  const isNoContact = phone.startsWith('@no_contact_');
+  const phoneTxt = isNoContact ? '연락처 없음' : (phone || '-');
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">기본 정보</div>
+      ${detailRow('연락처', `<span class="${isInsta ? 'contact-insta' : isNoContact ? 'contact-none' : 'contact-phone'}">${phoneTxt}</span>`)}
+      ${detailRow('유입 채널', esc(r.inflow_type))}
+      ${detailRow('유입일', fmtDate(r.inflow_date))}
+      ${detailRow('다음 상담일', fmtDate(r.next_consult_date))}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">시공 정보</div>
+      ${detailRow('시공일', fmtDate(r.install_date))}
+      ${detailRow('설치구조', esc(r.install_type))}
+      ${detailRow('시공기사', esc(r.installer))}
+      ${detailRow('지역', esc(r.region))}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">견적 · 결제</div>
+      ${detailRow('견적금액', fmtWon(r.quote_amount))}
+      ${detailRow('결제방법', esc(r.pay_type))}
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">파일 보유</div>
+      <div style="padding:4px 0;">
+        ${fileBadge('견적서', r.has_quote)}
+        ${fileBadge('방사진', r.has_room_photo)}
+        ${fileBadge('시공사진', r.has_install_photo)}
+      </div>
+    </div>
+    ${r.address || r.location ? `
+    <div class="detail-section">
+      <div class="detail-section-title">주소</div>
+      ${detailRow('주소', esc(r.address))}
+      ${detailRow('위치', esc(r.location))}
+    </div>` : ''}
+    ${r.notes ? `
+    <div class="detail-section">
+      <div class="detail-section-title">메모</div>
+      <div class="detail-memo">${esc(r.notes)}</div>
+    </div>` : ''}
+  `;
+
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closeDetailPanel() {
+  document.getElementById('detailPanel').classList.remove('open');
+  if (_selectedTr) { _selectedTr.classList.remove('row-selected'); _selectedTr = null; }
+}
+
+document.getElementById('detailClose').addEventListener('click', closeDetailPanel);
 
 // ===== 컬럼 헤더 클릭 정렬 =====
 document.querySelectorAll('th.sortable').forEach(th => {

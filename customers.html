@@ -41,31 +41,45 @@
             <option>상담종료</option>
             <option>반응무</option>
           </select>
-
         </div>
         <span id="rowCount" class="row-count">- 건</span>
       </div>
 
-      <div class="table-wrap">
-        <table class="customer-table">
-          <thead>
-            <tr>
-              <th class="col-idx">#</th>
-              <th class="col-name sortable" data-col="name">고객명 <span class="sort-icon">↕</span></th>
-              <th class="col-phone">연락처</th>
-              <th class="col-status sortable" data-col="status">상태 <span class="sort-icon">↕</span></th>
-              <th class="col-date sortable" data-col="inflow_date">유입일 <span class="sort-icon">↕</span></th>
-              <th class="col-date sortable" data-col="install_date">시공일 <span class="sort-icon">↕</span></th>
-              <th class="col-amount sortable" data-col="quote_amount">견적금액 <span class="sort-icon">↕</span></th>
-              <th class="col-addr">주소</th>
-              <th class="col-loc">위치</th>
-              <th class="col-pay">결제방법</th>
-              <th class="col-installer">시공기사</th>
-              <th class="col-notes">메모</th>
-            </tr>
-          </thead>
-          <tbody id="customerTableBody"></tbody>
-        </table>
+      <!-- 테이블 + 사이드 패널 -->
+      <div class="list-layout">
+        <div class="table-wrap">
+          <table class="customer-table">
+            <thead>
+              <tr>
+                <th class="col-idx">#</th>
+                <th class="col-name sortable" data-col="name">고객명 <span class="sort-icon">↕</span></th>
+                <th class="col-phone">연락처</th>
+                <th class="col-status sortable" data-col="status">상태 <span class="sort-icon">↕</span></th>
+                <th class="col-date sortable" data-col="inflow_date">유입일 <span class="sort-icon">↕</span></th>
+                <th class="col-date sortable" data-col="install_date">시공일 <span class="sort-icon">↕</span></th>
+                <th class="col-amount sortable" data-col="quote_amount">견적금액 <span class="sort-icon">↕</span></th>
+                <th class="col-addr">주소</th>
+                <th class="col-loc">위치</th>
+                <th class="col-pay">결제방법</th>
+                <th class="col-installer">시공기사</th>
+                <th class="col-notes">메모</th>
+              </tr>
+            </thead>
+            <tbody id="customerTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- 사이드 패널 -->
+        <aside class="detail-panel" id="detailPanel">
+          <div class="detail-header">
+            <div>
+              <div class="detail-name" id="detailName">-</div>
+              <div id="detailStatus"></div>
+            </div>
+            <button class="detail-close" id="detailClose">✕</button>
+          </div>
+          <div class="detail-body" id="detailBody"></div>
+        </aside>
       </div>
     </section>
 
